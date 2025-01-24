@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from jormungandr.autodiff import sin, cos, abs
 import math
 
-N = 100
+N = 500
 dt_guess = 0.05
 elevator_min_len = 36 * 0.0254 # 36 inches -> m
 elevator_max_len = 80 * 0.0254 # 60 inches -> m
@@ -81,7 +81,8 @@ def visualize_results(pivot_X, elevator_X, acc_input, dt_s, N):
   plt.subplot(3, 2, 5)
   cmap = plt.cm.viridis
   for i in range(len(endeff_x) - 1):
-      plt.plot(endeff_x[i:i+2], endeff_y[i:i+2], color=cmap(normalized_time[i]), lw=2)
+    plt.plot(endeff_x[i:i+2], endeff_y[i:i+2], color=cmap(normalized_time[i]), lw=2)
+  plt.scatter(0, 0, color="black", label="Origin", zorder=5)
   plt.scatter(endeff_x[0], endeff_y[0], color="blue", label="Start Point", zorder=5)
   plt.scatter(endeff_x[-1], endeff_y[-1], color="red", label="End Point", zorder=5)
   plt.xlabel("X Position (m)")
@@ -120,6 +121,7 @@ def main():
     pos = get_end_eff_pos(elevator_X[0, k], pivot_X[0, k])
     problem.subject_to(endeff_x_min <= pos[0])
     problem.subject_to(pos[0] <= endeff_x_max)
+    problem.subject_to(pos[1] > 0)
 
   for k in range(N):
     pivot_state_k = pivot_X[:, k]
@@ -168,8 +170,6 @@ def main():
   assert end_pos[0] > elevator_min_len
   assert end_pos[0] < elevator_max_len
 
-  print(math.degrees(start_pos[1]))
-
   assert start_pos[1] > pivot_min_theta
   assert start_pos[1] < pivot_max_theta
 
@@ -187,6 +187,9 @@ def main():
   problem.minimize(J)
 
   problem.solve(diagnostics = True)
+  print(f"Start pos: ({start_pos[0]} meters, {math.degrees(start_pos[1])}°)")
+  print(f"End pos: ({end_pos[0]} meters, {math.degrees(end_pos[1])}°)")
+  print(f"Total time: {total_time.value()}s")
   visualize_results(pivot_X, elevator_X, acc_input, dt_s, N) 
  
 if __name__ == "__main__":
