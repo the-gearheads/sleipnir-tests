@@ -48,14 +48,14 @@ def visualize_results(pivot_X, elevator_X, acc_input, dt_s, N):
 
     # Plot pivot state
     plt.figure(figsize=(16, 12))
-    plt.subplot(4, 2, 1)
+    plt.subplot(3, 2, 1)
     plt.plot(time_values, [math.degrees(angle) for angle in pivot_angles], label="Pivot Angle (deg)")
     plt.xlabel("Time (s)")
     plt.ylabel("Angle (deg)")
     plt.legend()
     plt.grid()
 
-    plt.subplot(4, 2, 2)
+    plt.subplot(3, 2, 2)
     plt.plot(time_values, pivot_velocities, label="Pivot Velocity (rad/s)", color="orange")
     plt.xlabel("Time (s)")
     plt.ylabel("Velocity (rad/s)")
@@ -63,14 +63,14 @@ def visualize_results(pivot_X, elevator_X, acc_input, dt_s, N):
     plt.grid()
 
     # Plot elevator state
-    plt.subplot(4, 2, 3)
+    plt.subplot(3, 2, 3)
     plt.plot(time_values, elevator_lengths, label="Elevator Length (m)", color="green")
     plt.xlabel("Time (s)")
     plt.ylabel("Length (m)")
     plt.legend()
     plt.grid()
 
-    plt.subplot(4, 2, 4)
+    plt.subplot(3, 2, 4)
     plt.plot(time_values, elevator_velocities, label="Elevator Velocity (m/s)", color="red")
     plt.xlabel("Time (s)")
     plt.ylabel("Velocity (m/s)")
@@ -78,7 +78,7 @@ def visualize_results(pivot_X, elevator_X, acc_input, dt_s, N):
     plt.grid()
 
     # Plot end-effector position
-    plt.subplot(4, 2, 5)
+    plt.subplot(3, 2, 5)
     cmap = plt.cm.viridis
     for i in range(len(endeff_x) - 1):
         plt.plot(endeff_x[i:i+2], endeff_y[i:i+2], color=cmap(normalized_time[i]), lw=2)
@@ -91,22 +91,14 @@ def visualize_results(pivot_X, elevator_X, acc_input, dt_s, N):
     plt.title("End-Effector Path (Color indicates progression)")
 
     # Plot accelerations
-    plt.subplot(4, 2, 6)
+    plt.subplot(3, 2, 6)
     plt.plot(time_values[:-1], pivot_accelerations, label="Pivot Acceleration (rad/s^2)", color="brown")
     plt.plot(time_values[:-1], elevator_accelerations, label="Elevator Acceleration (m/s^2)", color="cyan")
     plt.xlabel("Time (s)")
     plt.ylabel("Acceleration")
     plt.legend()
     plt.grid()
-
-    # Plot dt values
-    plt.subplot(4, 2, 7)
-    plt.plot(time_values, dt_values, label="dt (s)", color="magenta")
-    plt.xlabel("Time (s)")
-    plt.ylabel("dt (s)")
-    plt.legend()
-    plt.grid()
-
+    
     plt.tight_layout()
     plt.show()
 
