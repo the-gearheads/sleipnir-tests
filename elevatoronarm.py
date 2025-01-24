@@ -5,14 +5,16 @@ import math
 
 N = 500
 dt_guess = 0.05
-elevator_min_len = 36 * 0.0254 # 36 inches -> m
-elevator_max_len = 80 * 0.0254 # 60 inches -> m
+T_max = 10
+elevator_min_len = 36 * 0.0254 # 36 inches -> m (0.9144)
+elevator_max_len = 80 * 0.0254 # 60 inches -> m (2.032)
 
 pivot_min_theta = math.radians(-20)
 pivot_max_theta = math.radians(160)
 
 pivot_max_accel = math.radians(30) # deg/s^2
-elevator_max_accel = 2 # m/s^2
+# pivot_accel_reduction_per_meter = 1 # deg/s^2/m
+elevator_max_accel = 0.05 # m/s^2
 
 endeff_x_min = -(28.25 + 18) * 0.0254 # max amount to the left -> m
 endeff_x_max = 5 * 0.0254 # max amount to the right -> m
@@ -123,6 +125,7 @@ def main():
     problem.subject_to(pos[0] <= endeff_x_max)
     problem.subject_to(pos[1] > 0)
 
+
   for k in range(N):
     pivot_state_k = pivot_X[:, k]
     pivot_state_k1 = pivot_X[:, k + 1]
@@ -135,6 +138,7 @@ def main():
     dt_s[0, k + 1].set_value(dt_guess)
     problem.subject_to(dt_s[k + 1] == dt_s[k])
     problem.subject_to(dt_s[k + 1] > 0)
+    # problem.subject_to(dt_s[k] <= T_max / N)
 
 
     # Dynamics
@@ -144,6 +148,8 @@ def main():
     problem.subject_to(elevator_state_k1[0] == elevator_state_k[0] + dt_s[k] * elevator_state_k[1] + 0.5 * dt_s[k] ** 2 * acc_k[1])
     problem.subject_to(elevator_state_k1[1] == elevator_state_k[1] + dt_s[k] * acc_k[1])
 
+    # pivot_accel_limit = pivot_max_accel - ((elevator_state_k[0]) * pivot_accel_reduction_per_meter)
+    # pivot_accel_limit = max(pivot_accel_limit, 0)
     problem.subject_to(acc_k[0] >= -pivot_max_accel)
     problem.subject_to(acc_k[0] <= pivot_max_accel)
     problem.subject_to(acc_k[1] >= -elevator_max_accel)
@@ -182,6 +188,7 @@ def main():
   problem.subject_to(end_pos[1] == pivot_X[0, N])
 
   total_time = sum(dt_s[0, k] for k in range(N+1))
+  problem.subject_to(total_time <= T_max)
   J = total_time
   
   problem.minimize(J)
@@ -190,6 +197,7 @@ def main():
   print(f"Start pos: ({start_pos[0]} meters, {math.degrees(start_pos[1])}°)")
   print(f"End pos: ({end_pos[0]} meters, {math.degrees(end_pos[1])}°)")
   print(f"Total time: {total_time.value()}s")
+  print(elevator_X[0, N].value())
   visualize_results(pivot_X, elevator_X, acc_input, dt_s, N) 
  
 if __name__ == "__main__":
