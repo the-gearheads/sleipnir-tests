@@ -26,81 +26,81 @@ def get_elevator_len_arm_angle(x, y):
   return math.sqrt(x ** 2 + y ** 2), math.atan2(y, x)
 
 def visualize_results(pivot_X, elevator_X, acc_input, dt_s, N):
-    import numpy as np
+  import numpy as np
     
-    # Extract values from decision variables
-    pivot_angles = [pivot_X[0, k].value() for k in range(N + 1)]
-    pivot_velocities = [pivot_X[1, k].value() for k in range(N + 1)]
-    elevator_lengths = [elevator_X[0, k].value() for k in range(N + 1)]
-    elevator_velocities = [elevator_X[1, k].value() for k in range(N + 1)]
-    pivot_accelerations = [acc_input[0, k].value() for k in range(N)]
-    elevator_accelerations = [acc_input[1, k].value() for k in range(N)]
-    dt_values = [dt_s[0, k].value() for k in range(N + 1)]
+  # Extract values from decision variables
+  pivot_angles = [pivot_X[0, k].value() for k in range(N + 1)]
+  pivot_velocities = [pivot_X[1, k].value() for k in range(N + 1)]
+  elevator_lengths = [elevator_X[0, k].value() for k in range(N + 1)]
+  elevator_velocities = [elevator_X[1, k].value() for k in range(N + 1)]
+  pivot_accelerations = [acc_input[0, k].value() for k in range(N)]
+  elevator_accelerations = [acc_input[1, k].value() for k in range(N)]
+  dt_values = [dt_s[0, k].value() for k in range(N + 1)]
 
-    # Compute end-effector positions
-    endeff_x = [elevator_lengths[k] * math.cos(pivot_angles[k]) for k in range(N + 1)]
-    endeff_y = [elevator_lengths[k] * math.sin(pivot_angles[k]) for k in range(N + 1)]
+  # Compute end-effector positions
+  endeff_x = [elevator_lengths[k] * math.cos(pivot_angles[k]) for k in range(N + 1)]
+  endeff_y = [elevator_lengths[k] * math.sin(pivot_angles[k]) for k in range(N + 1)]
 
-    time_values = [sum(dt_values[:k+1]) for k in range(N + 1)]
+  time_values = [sum(dt_values[:k+1]) for k in range(N + 1)]
 
-    # Normalize time for colormap
-    normalized_time = np.linspace(0, 1, len(endeff_x))
+  # Normalize time for colormap
+  normalized_time = np.linspace(0, 1, len(endeff_x))
 
-    # Plot pivot state
-    plt.figure(figsize=(16, 12))
-    plt.subplot(3, 2, 1)
-    plt.plot(time_values, [math.degrees(angle) for angle in pivot_angles], label="Pivot Angle (deg)")
-    plt.xlabel("Time (s)")
-    plt.ylabel("Angle (deg)")
-    plt.legend()
-    plt.grid()
+  # Plot pivot state
+  plt.figure(figsize=(16, 12))
+  plt.subplot(3, 2, 1)
+  plt.plot(time_values, [math.degrees(angle) for angle in pivot_angles], label="Pivot Angle (deg)")
+  plt.xlabel("Time (s)")
+  plt.ylabel("Angle (deg)")
+  plt.legend()
+  plt.grid()
 
-    plt.subplot(3, 2, 2)
-    plt.plot(time_values, pivot_velocities, label="Pivot Velocity (rad/s)", color="orange")
-    plt.xlabel("Time (s)")
-    plt.ylabel("Velocity (rad/s)")
-    plt.legend()
-    plt.grid()
+  plt.subplot(3, 2, 2)
+  plt.plot(time_values, pivot_velocities, label="Pivot Velocity (rad/s)", color="orange")
+  plt.xlabel("Time (s)")
+  plt.ylabel("Velocity (rad/s)")
+  plt.legend()
+  plt.grid()
 
-    # Plot elevator state
-    plt.subplot(3, 2, 3)
-    plt.plot(time_values, elevator_lengths, label="Elevator Length (m)", color="green")
-    plt.xlabel("Time (s)")
-    plt.ylabel("Length (m)")
-    plt.legend()
-    plt.grid()
+  # Plot elevator state
+  plt.subplot(3, 2, 3)
+  plt.plot(time_values, elevator_lengths, label="Elevator Length (m)", color="green")
+  plt.xlabel("Time (s)")
+  plt.ylabel("Length (m)")
+  plt.legend()
+  plt.grid()
 
-    plt.subplot(3, 2, 4)
-    plt.plot(time_values, elevator_velocities, label="Elevator Velocity (m/s)", color="red")
-    plt.xlabel("Time (s)")
-    plt.ylabel("Velocity (m/s)")
-    plt.legend()
-    plt.grid()
+  plt.subplot(3, 2, 4)
+  plt.plot(time_values, elevator_velocities, label="Elevator Velocity (m/s)", color="red")
+  plt.xlabel("Time (s)")
+  plt.ylabel("Velocity (m/s)")
+  plt.legend()
+  plt.grid()
 
-    # Plot end-effector position
-    plt.subplot(3, 2, 5)
-    cmap = plt.cm.viridis
-    for i in range(len(endeff_x) - 1):
-        plt.plot(endeff_x[i:i+2], endeff_y[i:i+2], color=cmap(normalized_time[i]), lw=2)
-    plt.scatter(endeff_x[0], endeff_y[0], color="blue", label="Start Point", zorder=5)
-    plt.scatter(endeff_x[-1], endeff_y[-1], color="red", label="End Point", zorder=5)
-    plt.xlabel("X Position (m)")
-    plt.ylabel("Y Position (m)")
-    plt.legend()
-    plt.grid()
-    plt.title("End-Effector Path (Color indicates progression)")
+  # Plot end-effector position
+  plt.subplot(3, 2, 5)
+  cmap = plt.cm.viridis
+  for i in range(len(endeff_x) - 1):
+      plt.plot(endeff_x[i:i+2], endeff_y[i:i+2], color=cmap(normalized_time[i]), lw=2)
+  plt.scatter(endeff_x[0], endeff_y[0], color="blue", label="Start Point", zorder=5)
+  plt.scatter(endeff_x[-1], endeff_y[-1], color="red", label="End Point", zorder=5)
+  plt.xlabel("X Position (m)")
+  plt.ylabel("Y Position (m)")
+  plt.legend()
+  plt.grid()
+  plt.title("End-Effector Path (Color indicates progression)")
 
-    # Plot accelerations
-    plt.subplot(3, 2, 6)
-    plt.plot(time_values[:-1], pivot_accelerations, label="Pivot Acceleration (rad/s^2)", color="brown")
-    plt.plot(time_values[:-1], elevator_accelerations, label="Elevator Acceleration (m/s^2)", color="cyan")
-    plt.xlabel("Time (s)")
-    plt.ylabel("Acceleration")
-    plt.legend()
-    plt.grid()
+  # Plot accelerations
+  plt.subplot(3, 2, 6)
+  plt.plot(time_values[:-1], pivot_accelerations, label="Pivot Acceleration (rad/s^2)", color="brown")
+  plt.plot(time_values[:-1], elevator_accelerations, label="Elevator Acceleration (m/s^2)", color="cyan")
+  plt.xlabel("Time (s)")
+  plt.ylabel("Acceleration")
+  plt.legend()
+  plt.grid()
     
-    plt.tight_layout()
-    plt.show()
+  plt.tight_layout()
+  plt.show()
 
 
 def main():
@@ -187,11 +187,7 @@ def main():
   problem.minimize(J)
 
   problem.solve(diagnostics = True)
-  visualize_results(pivot_X, elevator_X, acc_input, dt_s, N)
- 
-  # x = 18.0, y = 6.0
-  # print(f"x = {x.value()}, y = {y.value()}")
- 
+  visualize_results(pivot_X, elevator_X, acc_input, dt_s, N) 
  
 if __name__ == "__main__":
   main()
