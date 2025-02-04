@@ -29,7 +29,7 @@ def get_elevator_len_arm_angle(x, y):
 
 def visualize_results(pivot_X, elevator_X, acc_input, dt_s, N):
   import numpy as np
-    
+
   # Extract values from decision variables
   pivot_angles = [pivot_X[0, k].value() for k in range(N + 1)]
   pivot_velocities = [pivot_X[1, k].value() for k in range(N + 1)]
@@ -39,13 +39,15 @@ def visualize_results(pivot_X, elevator_X, acc_input, dt_s, N):
   elevator_accelerations = [acc_input[1, k].value() for k in range(N)]
   dt_values = [dt_s[0, k].value() for k in range(N + 1)]
 
+  # Compute acceleration bounds
+  max_pivot_accel = [pivot_max_accel * (elevator_min_len / elevator_lengths[k])**2 for k in range(N)]
+  min_pivot_accel = [-x for x in max_pivot_accel]
+
   # Compute end-effector positions
   endeff_x = [elevator_lengths[k] * math.cos(pivot_angles[k]) for k in range(N + 1)]
   endeff_y = [elevator_lengths[k] * math.sin(pivot_angles[k]) for k in range(N + 1)]
 
   time_values = [sum(dt_values[:k+1]) for k in range(N + 1)]
-
-  # Normalize time for colormap
   normalized_time = np.linspace(0, 1, len(endeff_x))
 
   # Plot pivot state
@@ -92,11 +94,14 @@ def visualize_results(pivot_X, elevator_X, acc_input, dt_s, N):
   plt.legend()
   plt.grid()
   plt.title("End-Effector Path (Color indicates progression)")
+  plt.gca().set_aspect('equal', adjustable='datalim')  # Square aspect ratio
 
-  # Plot accelerations
+  # Plot accelerations with bounds
   plt.subplot(3, 2, 6)
-  plt.plot(time_values[:-1], pivot_accelerations, label="Pivot Acceleration (rad/s^2)", color="brown")
-  plt.plot(time_values[:-1], elevator_accelerations, label="Elevator Acceleration (m/s^2)", color="cyan")
+  plt.plot(time_values[:-1], pivot_accelerations, label="Pivot Acceleration (rad/s²)", color="brown")
+  plt.plot(time_values[:-1], elevator_accelerations, label="Elevator Acceleration (m/s²)", color="cyan")
+  plt.plot(time_values[:-1], max_pivot_accel, color="brown", linestyle=":", label="Max Pivot Acceleration")
+  plt.plot(time_values[:-1], min_pivot_accel, color="brown", linestyle=":", label="Min Pivot Acceleration")
   plt.xlabel("Time (s)")
   plt.ylabel("Acceleration")
   plt.legend()
