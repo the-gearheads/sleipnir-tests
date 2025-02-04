@@ -198,7 +198,7 @@ def main():
   problem.minimize(J)
 
   problem.solve(diagnostics = True)
-  print(f"With pivot accel reduction max extension is {pivot_max_accel / pivot_accel_reduction_per_meter}m")
+  # print(f"With pivot accel reduction max extension is {pivot_max_accel / pivot_accel_reduction_per_meter}m")
   print(f"Start pos: ({start_pos[0]} meters, {math.degrees(start_pos[1])}°)")
   print(f"End pos: ({end_pos[0]} meters, {math.degrees(end_pos[1])}°)")
   print(f"Total time: {total_time.value()}s")
