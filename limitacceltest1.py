@@ -12,9 +12,9 @@ elevator_max_len = 80 * 0.0254 # 60 inches -> m (2.032)
 pivot_min_theta = math.radians(30)
 pivot_max_theta = math.radians(90)
 
-pivot_max_accel = math.radians(30) # deg/s^2
-pivot_accel_reduction_per_meter = 0.25 # deg/s^2/m
-elevator_max_accel = 0.5 # m/s^2
+pivot_max_accel = math.radians(100) # deg/s^2
+# pivot_accel_reduction_per_meter = 0.3 # deg/s^2/m
+elevator_max_accel = 2 # m/s^2
 
 endeff_x_max = (28.25 + 18) * 0.0254 # max amount to the left -> m
 endeff_x_min = 0 # max amount to the right -> m
@@ -148,10 +148,11 @@ def main():
     problem.subject_to(elevator_state_k1[0] == elevator_state_k[0] + dt_s[k] * elevator_state_k[1] + 0.5 * dt_s[k] ** 2 * acc_k[1])
     problem.subject_to(elevator_state_k1[1] == elevator_state_k[1] + dt_s[k] * acc_k[1])
 
-    pivot_accel_limit = pivot_max_accel - ((elevator_state_k1[0]) * pivot_accel_reduction_per_meter)
-    pivot_accel_limit = max(pivot_accel_limit, 0)
+    elevator_state_k[0].set_value(elevator_min_len) # avoid singularities at the initial 0 length state
+    pivot_accel_limit = pivot_max_accel * pow(elevator_min_len / elevator_state_k[0], 2)
+    # pivot_accel_limit = max(pivot_accel_limit, 1e-4)
     # pivot_accel_limit = pivot_max_accel
-    problem.subject_to(pivot_accel_limit > 0)
+    # problem.subject_to(pivot_accel_limit > 0)
     # problem.subject_to(elevator_state_k1[0] < pivot_max_accel / pivot_accel_reduction_per_meter)
     problem.subject_to(acc_k[0] >= -pivot_accel_limit)
     problem.subject_to(acc_k[0] <= pivot_accel_limit)
