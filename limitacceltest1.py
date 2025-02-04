@@ -1,11 +1,11 @@
 from jormungandr.optimization import OptimizationProblem
 import matplotlib.pyplot as plt
-from jormungandr.autodiff import sin, cos, abs
+from jormungandr.autodiff import sin, cos, abs, pow, sqrt
 import math
 
 N = 500
 dt_guess = 0.05
-T_max = 10
+T_max = 20
 elevator_min_len = 36 * 0.0254 # 36 inches -> m (0.9144)
 elevator_max_len = 80 * 0.0254 # 60 inches -> m (2.032)
 
@@ -13,8 +13,8 @@ pivot_min_theta = math.radians(-20)
 pivot_max_theta = math.radians(160)
 
 pivot_max_accel = math.radians(30) # deg/s^2
-# pivot_accel_reduction_per_meter = 1 # deg/s^2/m
-elevator_max_accel = 0.05 # m/s^2
+pivot_accel_reduction_per_meter = 0.25 # deg/s^2/m
+elevator_max_accel = 0.5 # m/s^2
 
 endeff_x_min = -(28.25 + 18) * 0.0254 # max amount to the left -> m
 endeff_x_max = 5 * 0.0254 # max amount to the right -> m
@@ -148,21 +148,24 @@ def main():
     problem.subject_to(elevator_state_k1[0] == elevator_state_k[0] + dt_s[k] * elevator_state_k[1] + 0.5 * dt_s[k] ** 2 * acc_k[1])
     problem.subject_to(elevator_state_k1[1] == elevator_state_k[1] + dt_s[k] * acc_k[1])
 
-    # pivot_accel_limit = pivot_max_accel - ((elevator_state_k[0]) * pivot_accel_reduction_per_meter)
-    # pivot_accel_limit = max(pivot_accel_limit, 0)
-    problem.subject_to(acc_k[0] >= -pivot_max_accel)
-    problem.subject_to(acc_k[0] <= pivot_max_accel)
+    pivot_accel_limit = pivot_max_accel - ((elevator_state_k1[0]) * pivot_accel_reduction_per_meter)
+    pivot_accel_limit = max(pivot_accel_limit, 0)
+    # pivot_accel_limit = pivot_max_accel
+    problem.subject_to(pivot_accel_limit > 0)
+    # problem.subject_to(elevator_state_k1[0] < pivot_max_accel / pivot_accel_reduction_per_meter)
+    problem.subject_to(acc_k[0] >= -pivot_accel_limit)
+    problem.subject_to(acc_k[0] <= pivot_accel_limit)
     problem.subject_to(acc_k[1] >= -elevator_max_accel)
     problem.subject_to(acc_k[1] <= elevator_max_accel)
 
   # problem.subject_to(pivot_X[0, 0] == math.radians(45))
-  problem.subject_to(pivot_X[1, 0] == 0.1)
+  problem.subject_to(pivot_X[1, 0] == 0)
 
   # problem.subject_to(elevator_X[0, 0] == elevator_min_len)
   problem.subject_to(elevator_X[1, 0] == 0)
 
   # problem.subject_to(pivot_X[0, N] == math.radians(60))
-  problem.subject_to(pivot_X[1, N] == -0.08)
+  problem.subject_to(pivot_X[1, N] == 0)
 
   # problem.subject_to(elevator_X[0, N] == 60 * 0.0254)
   problem.subject_to(elevator_X[1, N] == 0)
