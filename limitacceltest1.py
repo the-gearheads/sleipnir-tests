@@ -9,15 +9,15 @@ T_max = 20
 elevator_min_len = 36 * 0.0254 # 36 inches -> m (0.9144)
 elevator_max_len = 80 * 0.0254 # 60 inches -> m (2.032)
 
-pivot_min_theta = math.radians(-20)
-pivot_max_theta = math.radians(160)
+pivot_min_theta = math.radians(30)
+pivot_max_theta = math.radians(90)
 
 pivot_max_accel = math.radians(30) # deg/s^2
 pivot_accel_reduction_per_meter = 0.25 # deg/s^2/m
 elevator_max_accel = 0.5 # m/s^2
 
-endeff_x_min = -(28.25 + 18) * 0.0254 # max amount to the left -> m
-endeff_x_max = 5 * 0.0254 # max amount to the right -> m
+endeff_x_max = (28.25 + 18) * 0.0254 # max amount to the left -> m
+endeff_x_min = 0 # max amount to the right -> m
 
 def get_end_eff_pos(ext_len, theta):
   x = ext_len * cos(theta)
@@ -170,8 +170,8 @@ def main():
   # problem.subject_to(elevator_X[0, N] == 60 * 0.0254)
   problem.subject_to(elevator_X[1, N] == 0)
 
-  start_pos = get_elevator_len_arm_angle(-0.2, 1.5)
-  end_pos = get_elevator_len_arm_angle(-0.4, 1)
+  start_pos = get_elevator_len_arm_angle(0.2, 1.5)
+  end_pos = get_elevator_len_arm_angle(0.4, 1)
 
   assert start_pos[0] > elevator_min_len
   assert start_pos[0] < elevator_max_len
